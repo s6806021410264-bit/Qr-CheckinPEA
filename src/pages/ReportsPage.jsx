@@ -6,19 +6,32 @@ import { getMonthlyCheckins } from '../admin/services/adminDashboardService'
 
 const PER_PAGE = 10
 
+function getUserType(code = '') {
+  const normalized = code.toLowerCase()
+  if (normalized.startsWith('new-')) return 'New'
+  if (normalized.startsWith('emp')) return 'Staff'
+  return 'Other'
+}
+
+function csvCell(value) {
+  const text = String(value ?? '')
+  return `"${text.replaceAll('"', '""')}"`
+}
+
 function exportCSV(checkins, label) {
-  const rows = [['#', 'Name', 'Code', 'Position', 'Date', 'Time']]
+  const rows = [['#', 'Name', 'Code', 'Type', 'Position', 'Date', 'Time']]
   checkins.forEach((item, i) => {
     rows.push([
       i + 1,
       item.users?.name || '',
       item.users?.code || '',
+      getUserType(item.users?.code),
       item.users?.position || '',
       formatDate(item.created_at),
       formatTime(item.created_at),
     ])
   })
-  const csv = rows.map(r => r.join(',')).join('\n')
+  const csv = rows.map(r => r.map(csvCell).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -115,12 +128,12 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
           <span className="adm-stat-val">{checkins.length > 0 ? `${peakHour}:00` : '—'}</span>
         </div>
         <div className="adm-stat-row">
-          <span className="adm-stat-label">Walk-in Users</span>
-          <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.startsWith('WALK')).length}</span>
+          <span className="adm-stat-label">New Users</span>
+          <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.toLowerCase().startsWith('new-')).length}</span>
         </div>
         <div className="adm-stat-row">
           <span className="adm-stat-label">Staff Users</span>
-          <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.startsWith('EMP')).length}</span>
+          <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.toLowerCase().startsWith('emp')).length}</span>
         </div>
       </div>
 

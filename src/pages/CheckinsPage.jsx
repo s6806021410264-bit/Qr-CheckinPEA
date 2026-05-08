@@ -3,14 +3,17 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { SkeletonTable, EmptyState, LiveIndicator } from '../components/AdminShared'
-import { formatDate, formatTime } from '../admin/utils/dateUtils'
+import { formatDate, formatTime, getTodayBangkok } from '../admin/utils/dateUtils'
+import { getCheckinsByDate } from '../admin/services/adminDashboardService'
 
 export default function CheckinsPage({ checkins, loading }) {
   const [filterDate, setFilterDate] = useState('')
-  const [newIds, setNewIds]         = useState(new Set())
-  const prevLen                     = useRef(checkins.length)
+  const [historyCheckins, setHistoryCheckins] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState('')
+  const [newIds, setNewIds] = useState(new Set())
+  const prevLen = useRef(checkins.length)
 
-  // ไฮไลท์แถวที่เพิ่งเข้ามาใหม่
   useEffect(() => {
     if (checkins.length > prevLen.current) {
       const freshIds = new Set(
@@ -22,9 +25,42 @@ export default function CheckinsPage({ checkins, loading }) {
     prevLen.current = checkins.length
   }, [checkins])
 
-  const filtered = filterDate
-    ? checkins.filter(c => c.created_at.startsWith(filterDate))
-    : checkins
+  useEffect(() => {
+    let active = true
+
+    async function loadHistory() {
+      if (!filterDate || filterDate === getTodayBangkok()) {
+        setHistoryCheckins([])
+        setHistoryError('')
+        return
+      }
+
+      setHistoryLoading(true)
+      setHistoryError('')
+
+      try {
+        const data = await getCheckinsByDate(filterDate)
+        if (active) setHistoryCheckins(data)
+      } catch (err) {
+        if (active) {
+          setHistoryCheckins([])
+          setHistoryError(err.message || 'Failed to load check-ins')
+        }
+      } finally {
+        if (active) setHistoryLoading(false)
+      }
+    }
+
+    loadHistory()
+
+    return () => {
+      active = false
+    }
+  }, [filterDate])
+
+  const showingHistory = Boolean(filterDate && filterDate !== getTodayBangkok())
+  const tableLoading = showingHistory ? historyLoading : loading
+  const rows = showingHistory ? historyCheckins : checkins
 
   return (
     <>
@@ -43,23 +79,31 @@ export default function CheckinsPage({ checkins, loading }) {
         {filterDate && (
           <button className="adm-btn btn-ghost" onClick={() => setFilterDate('')}>Clear</button>
         )}
-        <div style={{ marginLeft: 'auto' }}>
-          <LiveIndicator label="Realtime" />
-        </div>
+        {!showingHistory && (
+          <div style={{ marginLeft: 'auto' }}>
+            <LiveIndicator label="Realtime" />
+          </div>
+        )}
       </div>
+
+      {historyError && (
+        <div className="adm-card" style={{ marginBottom: 12, padding: 14, color: 'var(--red)' }}>
+          {historyError}
+        </div>
+      )}
 
       <div className="adm-card">
         <div className="adm-table-wrap">
-          {loading
+          {tableLoading
             ? <div style={{ padding: 20 }}><SkeletonTable /></div>
-            : filtered.length === 0
+            : rows.length === 0
               ? <EmptyState icon="🔍" message="No check-ins found" />
               : (
                 <table className="adm-table">
                   <thead><tr><th>#</th><th>Name</th><th>Code</th><th>Date</th><th>Time</th></tr></thead>
                   <tbody>
-                    {filtered.map((item, i) => (
-                      <tr key={item.id} className={newIds.has(item.id) ? 'new-row' : ''}>
+                    {rows.map((item, i) => (
+                      <tr key={item.id} className={!showingHistory && newIds.has(item.id) ? 'new-row' : ''}>
                         <td style={{ color: 'var(--muted)', fontFamily: 'var(--mono)' }}>{i + 1}</td>
                         <td style={{ fontWeight: 500 }}>👤 {item.users?.name}</td>
                         <td><span className="adm-badge badge-user">{item.users?.code}</span></td>

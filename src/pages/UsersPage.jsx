@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { SkeletonTable, EmptyState, Pagination } from '../components/AdminShared'
 import { getAllUsers, createUser, updateUser, deleteUser } from '../admin/services/adminDashboardService'
+import { FALLBACK_POSITION_OPTIONS, getPositionOptions } from '../lib/positions'
 
 const PER_PAGE = 8
 
@@ -12,6 +13,7 @@ export default function UsersPage({ toast }) {
   const [page, setPage] = useState(1)
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ name: '', code: '', role: 'user', position: '' })  // ← เพิ่ม position
+  const [positionOptions, setPositionOptions] = useState(FALLBACK_POSITION_OPTIONS)
 
   async function loadUsers() {
     setLoading(true)
@@ -25,6 +27,21 @@ export default function UsersPage({ toast }) {
   }
 
   useEffect(() => { loadUsers() }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadPositions() {
+      const options = await getPositionOptions()
+      if (active) setPositionOptions(options)
+    }
+
+    loadPositions()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase()
@@ -153,15 +170,20 @@ export default function UsersPage({ toast }) {
             <div className="adm-form-group">
               <label>Code</label>
               <input className="adm-input" style={{ width: '100%' }} placeholder="EMP001"
-                value={form.code} disabled={!!modal?.edit}
+                value={form.code}
                 onChange={e => setForm(f => ({ ...f, code: e.target.value }))} />
             </div>
 
             <div className="adm-form-group"> 
               <label>Position</label>
-              <input className="adm-input" style={{ width: '100%' }} placeholder="ชื่อแผนก..."
+              <select className="adm-select" style={{ width: '100%' }}
                 value={form.position}
-                onChange={e => setForm(f => ({ ...f, position: e.target.value }))} />
+                onChange={e => setForm(f => ({ ...f, position: e.target.value }))}>
+                <option value="">Select position</option>
+                {positionOptions.map(item => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
             </div>
 
             <div className="adm-form-group">

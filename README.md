@@ -1,16 +1,42 @@
-# React + Vite
+# QR Check-in PEA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ระบบลงชื่อเข้าร่วมกิจกรรมด้วยรหัสพนักงาน สร้างด้วย React, Vite และ Supabase
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. ติดตั้ง dependencies
 
-## React Compiler
+```bash
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. สร้างไฟล์ `.env` จาก `.env.example`
 
-## Expanding the ESLint configuration
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-or-anon-key
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. รันระบบสำหรับพัฒนา
+
+```bash
+npm run dev
+```
+
+## Production Check
+
+```bash
+npm run check
+```
+
+อ่านรายการก่อนใช้งานจริงใน [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)
+
+ตั้งค่าตำแหน่งที่ใช้ใน dropdown ได้ตาม [POSITIONS_SETUP.md](./POSITIONS_SETUP.md)
+
+## Deploy
+
+```bash
+npm run deploy
+```
+
+หมายเหตุ: การป้องกันข้อมูลจริงต้องตั้งค่า Supabase Row Level Security และระบบ auth สำหรับ admin ให้เรียบร้อยก่อนใช้งานในองค์กร

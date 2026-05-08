@@ -1,69 +1,141 @@
-// src/pages/RegisterForm.jsx
 import { useState, useRef, useEffect } from 'react'
 import PageShell from '../components/PageShell'
 import StatusBanner from '../components/StatusBanner'
-import { registerAndCheckIn } from '../lib/checkinService'
+import { registerWalkInUser } from '../lib/registerService'
+import { performCheckIn } from '../lib/checkinService'
+import { FALLBACK_POSITION_OPTIONS, getPositionOptions } from '../lib/positions'
 
-export default function RegisterForm({ pendingCode, onSuccess, onBack }) {
+export default function RegisterForm({ onSuccess, onBack, theme, onToggleTheme }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [position, setPosition] = useState('')
+  const [positionOptions, setPositionOptions] = useState(FALLBACK_POSITION_OPTIONS)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+
   const firstNameRef = useRef(null)
 
-  useEffect(() => { firstNameRef.current?.focus() }, [])
+  useEffect(() => {
+    firstNameRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadPositions() {
+      const options = await getPositionOptions()
+      if (active) setPositionOptions(options)
+    }
+
+    loadPositions()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!firstName.trim() || !lastName.trim()) return
+
+    if (!firstName.trim() || !lastName.trim() || !position) return
 
     setLoading(true)
     setResult(null)
 
-    const res = await registerAndCheckIn(firstName, lastName)
-    setLoading(false)
+    try {
+      const user = await registerWalkInUser({ firstName, lastName, position })
+      const checkinResult = await performCheckIn(user.code)
 
-    if (res.status === 'success') { onSuccess(res); return }
-    setResult(res)
+      if (checkinResult.status === 'success') {
+        onSuccess?.(checkinResult)
+        setFirstName('')
+        setLastName('')
+        setPosition('')
+        return
+      }
+
+      setResult({
+        ...checkinResult,
+        message: checkinResult.message || `ลงทะเบียนสำเร็จ รหัสของคุณคือ ${user.code}`,
+      })
+    } catch (err) {
+      console.error(err)
+
+      setResult({
+        status: 'error',
+        message: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const canSubmit = firstName.trim() && lastName.trim() && !loading
+  const canSubmit =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    position &&
+    !loading
 
   return (
-    <PageShell logo="+" title="ลงทะเบียนใหม่" subtitle={`รหัส "${pendingCode}" ยังไม่มีในระบบ`}>
+    <PageShell
+      logo="+"
+      title="ลงทะเบียนผู้ใช้งานใหม่"
+      theme={theme}
+      onToggleTheme={onToggleTheme}
+    >
       <main className="card">
-        <p className="card-hint">กรอกชื่อและนามสกุลเพื่อลงทะเบียน</p>
+        <p className="card-hint">
+          กรอกข้อมูลให้ครบ ระบบจะออกรหัส new-001, new-002 ตามลำดับ และ check-in ให้อัตโนมัติ
+        </p>
+
         <form onSubmit={handleSubmit} className="form">
           <input
             ref={firstNameRef}
             type="text"
             className="input"
-            placeholder="ชื่อ เช่น สมชาย"
+            placeholder="ชื่อ"
             value={firstName}
             onChange={e => setFirstName(e.target.value)}
             disabled={loading}
-            style={{ textTransform: 'none', letterSpacing: 'normal', textAlign: 'left' }}
-            
+            maxLength={80}
           />
+
           <input
             type="text"
             className="input"
-            placeholder="นามสกุล เช่น ใจดี"
+            placeholder="นามสกุล"
             value={lastName}
             onChange={e => setLastName(e.target.value)}
             disabled={loading}
-            style={{ textTransform: 'none', letterSpacing: 'normal', textAlign: 'left' }}
+            maxLength={80}
           />
-          <p style={{ fontSize: '.82rem', color: 'var(--muted)', textAlign: 'center' }}>
-            ระบบจะออกรหัสให้อัตโนมัติ (WALK-XXXX)
-          </p>
+
+          <select
+            className="input"
+            value={position}
+            onChange={e => setPosition(e.target.value)}
+            disabled={loading}
+          >
+            <option value="">เลือกตำแหน่ง</option>
+            {positionOptions.map(item => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+
           <button type="submit" className="btn" disabled={!canSubmit}>
-            {loading ? <span className="spinner" /> : 'ลงทะเบียน + Check-in'}
+            {loading ? <span className="spinner" /> : 'สมัครและ Check-in'}
           </button>
-          <button type="button" className="btn-back" onClick={onBack} disabled={loading}>
+
+          <button
+            type="button"
+            className="btn-back"
+            onClick={onBack}
+            disabled={loading}
+          >
             ← กลับ
           </button>
         </form>
+
         <StatusBanner result={result} />
       </main>
     </PageShell>

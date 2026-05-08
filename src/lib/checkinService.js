@@ -1,22 +1,14 @@
 // src/lib/checkinService.js
 import { supabase } from './supabase'
 
-// รูปแบบรหัสที่รับได้
-const CODE_PATTERNS = [
-  /^EMP\d{3,}$/,   // EMP001, EMP0001, ...
-  /^WALK-\d{4}$/,  // WALK-0001, WALK-0002, ...
-]
-
-export function isValidCodeFormat(code) {
-  const normalized = code.trim().toUpperCase()
-  return CODE_PATTERNS.some(pattern => pattern.test(normalized))
-}
-
-// หา event วันนี้
-export async function getTodayEvent() {
-  const today = new Intl.DateTimeFormat('en-CA', {
+export function getTodayBangkokDate() {
+  return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok',
   }).format(new Date())
+}
+
+export async function getTodayEvent() {
+  const today = getTodayBangkokDate()
 
   const { data, error } = await supabase
     .from('events')
@@ -28,19 +20,17 @@ export async function getTodayEvent() {
   return data
 }
 
-// หา user จากรหัส (เพิ่ม role)
 export async function getUserByCode(code) {
   const { data, error } = await supabase
     .from('users')
-    .select('id, name, code, role,position') // ✅ เพิ่ม role
-    .eq('code', code.trim().toUpperCase())
+    .select('id, name, code, role, position')
+    .eq('code', code.trim())
     .maybeSingle()
 
   if (error) throw new Error(`getUserByCode failed: ${error.message}`)
   return data
 }
 
-// ตรวจว่าเคย check-in แล้วไหม
 export async function hasCheckedIn(userId, eventId) {
   const { data, error } = await supabase
     .from('checkins')
@@ -53,7 +43,6 @@ export async function hasCheckedIn(userId, eventId) {
   return data?.length > 0
 }
 
-// บันทึก check-in
 export async function recordCheckIn(userId, eventId) {
   const { error } = await supabase
     .from('checkins')
@@ -68,112 +57,40 @@ export async function recordCheckIn(userId, eventId) {
   return { status: 'success' }
 }
 
-// check-in ปกติ (มีรหัสในระบบ)
 export async function performCheckIn(userCode) {
-  const normalizedCode = userCode.trim().toUpperCase()
+  const inputCode = userCode.trim()
 
-  // validate format ก่อน query DB
-  if (!isValidCodeFormat(normalizedCode)) {
+  const user = await getUserByCode(inputCode)
+
+  if (!user) {
     return {
-      status: 'invalid_format',
-      message: 'รูปแบบรหัสไม่ถูกต้อง — ตัวอย่าง: EMP001 หรือ WALK-0001',
+      status: 'not_found',
+      message: 'ไม่พบรหัสนี้ในระบบ กรุณาลงทะเบียนก่อนใช้งาน',
+      code: inputCode,
     }
   }
 
-  try {
-    // ✅ ตรวจ user ก่อนเลย เพื่อเช็ค role
-    const user = await getUserByCode(normalizedCode)
-    if (!user) return { status: 'not_found', message: `ไม่พบรหัส "${normalizedCode}" ในระบบ` }
-
-    // ✅ ถ้าเป็น admin → ข้าม event check ไปเลย
-    if (user.role === 'admin') {
-      return { status: 'success', user }
-    }
-
-    // 👤 user ปกติ → ค่อยตรวจ event
-    const event = await getTodayEvent()
-    if (!event) return { status: 'no_event', message: 'ไม่มีอีเวนต์วันนี้' }
-
-    const alreadyCheckedIn = await hasCheckedIn(user.id, event.id)
-    if (alreadyCheckedIn) {
-      return {
-        status: 'duplicate',
-        message: `${user.name} ลงชื่อแล้ว`,
-        user,  // ← ส่ง user กลับด้วย
-      }
-    }
-
-    const result = await recordCheckIn(user.id, event.id)
-
-    if (result.status === 'duplicate') {
-      return {
-        status: 'duplicate',
-        message: `${user.name} ลงชื่อแล้ว`,
-      }
-    }
-
-    return { status: 'success', message: `✓ ลงชื่อสำเร็จ! ยินดีต้อนรับ ${user.name}`, user, event }
-  } catch (err) {
-    console.error('[performCheckIn]', err)
-    return { status: 'error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }
+  if (user.role === 'admin') {
+    return { status: 'success', user }
   }
-}
 
-// ลงทะเบียน walk-in + check-in (ไม่มีรหัสในระบบ)
-export async function registerAndCheckIn(firstName, lastName) {
-  const trimmedFirst = firstName?.trim()
-  const trimmedLast = lastName?.trim()
-
-  if (!trimmedFirst) return { status: 'error', message: 'กรุณากรอกชื่อ' }
-  if (!trimmedLast) return { status: 'error', message: 'กรุณากรอกนามสกุล' }
-
-  const fullName = `${trimmedFirst} ${trimmedLast}`
-
-  try {
-    const event = await getTodayEvent()
-    if (!event) return { status: 'no_event', message: 'ไม่มีอีเวนต์วันนี้' }
-
-    let newUser = null
-    let attempts = 0
-    const MAX_ATTEMPTS = 5
-
-    while (!newUser && attempts < MAX_ATTEMPTS) {
-      attempts++
-
-      const { count } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .like('code', 'WALK-%')
-
-      const autoCode = `WALK-${String((count ?? 0) + 1).padStart(4, '0')}`
-
-      const { data, error } = await supabase
-        .from('users')
-        .insert({ name: fullName, code: autoCode })
-        .select('id, name, code')
-        .maybeSingle()
-
-      if (!error) {
-        newUser = data
-      } else if (error.code === '23505') {
-        continue
-      } else {
-        throw new Error(`registerAndCheckIn insert failed: ${error.message}`)
-      }
-    }
-
-    if (!newUser) return { status: 'error', message: 'ไม่สามารถสร้างรหัสได้ กรุณาลองใหม่' }
-
-    await recordCheckIn(newUser.id, event.id)
-
+  const event = await getTodayEvent()
+  if (!event) {
     return {
-      status: 'success',
-      message: `✓ ลงทะเบียนสำเร็จ! ยินดีต้อนรับ ${newUser.name}`,
-      user: newUser,
-      event,
+      status: 'no_event',
+      message: 'ยังไม่มีกิจกรรมสำหรับวันนี้',
     }
-  } catch (err) {
-    console.error('[registerAndCheckIn]', err)
-    return { status: 'error', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }
   }
+
+  const already = await hasCheckedIn(user.id, event.id)
+  if (already) {
+    return { status: 'duplicate', user }
+  }
+
+  const saved = await recordCheckIn(user.id, event.id)
+  if (saved.status === 'duplicate') {
+    return { status: 'duplicate', user }
+  }
+
+  return { status: 'success', user, event }
 }

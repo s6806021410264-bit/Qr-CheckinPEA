@@ -4,27 +4,32 @@ import RegisterForm from './pages/RegisterForm'
 import AlreadyDone from './pages/AlreadyDone'
 import CheckInSuccess from './pages/CheckInSuccess'
 import AdminDashboard from './admin/AdminDashboard'
+import { startAdminSession, endAdminSession } from './lib/adminSession'
+import { useTheme } from './lib/theme'
 
-const STORAGE_KEY = 'qr_checkin_done'
 const ADMIN_KEY = 'admin_user'
 
 export default function App() {
-  const [doneRecord, setDoneRecord] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) } catch { return null }
-  })
-
-  const [admin, setAdmin] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(ADMIN_KEY)) } catch { return null }
-  })
+  const { theme, toggleTheme } = useTheme()
+  const [admin, setAdmin] = useState(null)
 
   const [page, setPage] = useState('checkin')
-  const [pendingCode, setPendingCode] = useState('')
   const [successRecord, setSuccessRecord] = useState(null)
   const [alreadyRecord, setAlreadyRecord] = useState(null)
+  const [adminSession, setAdminSession] = useState(null)
+  const [checkInResult, setCheckInResult] = useState(null)
 
   useEffect(() => {
-    if (page === 'admin-dashboard' && !admin) setPage('checkin')
+    if (page === 'admin-dashboard' && !admin) {
+      setPage('checkin')
+    }
   }, [page, admin])
+
+  useEffect(() => {
+    return () => {
+      endAdminSession(adminSession)
+    }
+  }, [adminSession])
 
   function handleSuccess(res) {
     const record = {
@@ -33,8 +38,7 @@ export default function App() {
       position: res.user.position || '',
       date: new Date().toLocaleDateString('th-TH'),
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(record))
-    setDoneRecord(record)
+
     setSuccessRecord(record)
     setPage('success')
   }
@@ -46,43 +50,72 @@ export default function App() {
       position: res.user?.position || '',
       date: new Date().toLocaleDateString('th-TH'),
     })
+
     setPage('already')
   }
 
-  function handleNotFound(code) {
-    setPendingCode(code)
-    setPage('register')
-  }
-
   function handleBack() {
-    setPendingCode('')
+    setCheckInResult(null)
     setPage('checkin')
   }
 
-  function handleAdminFromCheckIn(user) {
+  async function handleAdminFromCheckIn(user) {
+    const session = await startAdminSession(user)
+
+    if (!session.ok) {
+      setCheckInResult({
+        status: 'error',
+        message: session.message || 'รหัส admin นี้กำลังใช้งานอยู่ในเครื่องอื่น',
+      })
+      setPage('checkin')
+      return
+    }
+
     localStorage.setItem(ADMIN_KEY, JSON.stringify(user))
     setAdmin(user)
+    setAdminSession(session)
+    setCheckInResult(null)
     setPage('admin-dashboard')
   }
 
-  if (page === 'admin-dashboard' && admin)
-    return <AdminDashboard />
+  function handleGoRegister() {
+    setCheckInResult(null)
+    setPage('register')
+  }
 
-  if (page === 'success' && successRecord)
+  async function handleLogout() {
+    await endAdminSession(adminSession)
+    setAdminSession(null)
+    setAdmin(null)
+    localStorage.removeItem(ADMIN_KEY)
+    setPage('checkin')
+  }
+
+  if (page === 'admin-dashboard' && admin) {
+    return (
+      <AdminDashboard
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onLogout={handleLogout}
+      />
+    )
+  }
+
+  if (page === 'success' && successRecord) {
     return <CheckInSuccess record={successRecord} />
+  }
 
-  if (page === 'already' && alreadyRecord)
+  if (page === 'already' && alreadyRecord) {
     return <AlreadyDone record={alreadyRecord} />
-
-  if (doneRecord)
-    return <AlreadyDone record={doneRecord} />
+  }
 
   if (page === 'register') {
     return (
       <RegisterForm
-        pendingCode={pendingCode}
         onSuccess={handleSuccess}
         onBack={handleBack}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     )
   }
@@ -90,9 +123,12 @@ export default function App() {
   return (
     <CheckInForm
       onSuccess={handleSuccess}
-      onNotFound={handleNotFound}
       onAdmin={handleAdminFromCheckIn}
       onDuplicate={handleDuplicate}
+      onGoRegister={handleGoRegister}
+      externalResult={checkInResult}
+      theme={theme}
+      onToggleTheme={toggleTheme}
     />
   )
 }

@@ -25,7 +25,7 @@ function getAdminFromStorage() {
        try { return JSON.parse(localStorage.getItem('admin_user')) } catch { return null }
 }
 
-export default function AdminDashboard({ onLogout }) {
+export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
        const [activePage, setActivePage] = useState('dashboard')
 
        // ← mobile เริ่มปิด sidebar อัตโนมัติ
@@ -160,7 +160,7 @@ export default function AdminDashboard({ onLogout }) {
                                           <div className="adm-avatar">{admin?.name?.[0] || 'A'}</div>
                                           <div>
                                                  <div className="adm-user-name">{admin?.name || 'Admin'}</div>
-                                                 <div className="adm-user-role">{admin?.code || 'administrator'}</div>
+                                                
                                           </div>
                                    </div>
                             </div>
@@ -175,6 +175,15 @@ export default function AdminDashboard({ onLogout }) {
 
                                    <div className="adm-topbar-right">
                                           <button className="adm-icon-btn" title="Refresh" onClick={loadCheckins}>↻</button>
+                                          {onToggleTheme && (
+                                                 <button
+                                                        className="adm-icon-btn"
+                                                        title={theme === 'light' ? 'เปลี่ยนเป็นโหมดมืด' : 'เปลี่ยนเป็นโหมดสว่าง'}
+                                                        onClick={onToggleTheme}
+                                                 >
+                                                        {theme === 'light' ? '☾' : '☀'}
+                                                 </button>
+                                          )}
 
                                           <div ref={notifRef} style={{ position: 'relative' }}>
                                                  <button className="adm-icon-btn" title="Notifications" onClick={handleNotifOpen}>
