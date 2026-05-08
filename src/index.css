@@ -1,0 +1,285 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ================== THEME ================== */
+:root {
+  --bg:         #020617;
+  --surface:    rgba(15, 23, 42, 0.7);
+  --border:     rgba(148, 163, 184, 0.15);
+
+  --accent:     #22d3ee;
+  --accent-2:   #00f5d4;
+  --accent-dim: #06b6d4;
+
+  --text:       #e2e8f0;
+  --muted:      #64748b;
+
+  --success:    #22c55e;
+  --error:      #f43f5e;
+  --warn:       #facc15;
+
+  --font: 'Sarabun', 'Segoe UI', sans-serif;
+}
+
+/* ================== BASE ================== */
+html, body, #root {
+  height: 100%;
+  font-family: var(--font);
+  color: var(--text);
+  background: linear-gradient(180deg, #1e293b, #111827);
+}
+
+/* ================== LAYOUT ================== */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+}
+
+/* ================== HEADER ================== */
+.header {
+  text-align: center;
+  animation: fadeDown .6s ease both;
+}
+
+.logo {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #020617;
+
+  font-size: 1.6rem;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+
+  /* 🔥 glow */
+  box-shadow:
+    0 0 20px var(--accent),
+    0 0 60px rgba(34,211,238,.3);
+}
+
+.title {
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: .95rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ================== CARD ================== */
+.card {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 28px 24px;
+  border-radius: 16px;
+
+  /* 🔥 glass effect */
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+
+  border: 1px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  animation: fadeUp .6s ease both;
+
+  /* 🔥 floating shadow */
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.5),
+    inset 0 0 0 1px rgba(255,255,255,.03);
+}
+
+.card-hint {
+  font-size: .9rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ================== FORM ================== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================== INPUT ================== */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+
+  background: rgba(2,6,23,.8);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+
+  transition: all .25s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--accent);
+
+  /* 🔥 glow focus */
+  box-shadow:
+    0 0 0 2px rgba(34,211,238,.2),
+    0 0 20px rgba(34,211,238,.2);
+}
+
+.input::placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.input:disabled {
+  opacity: .5;
+}
+
+/* ================== BUTTON ================== */
+.btn {
+  width: 100%;
+  padding: 14px;
+
+  border-radius: 12px;
+  border: none;
+
+  font-weight: 700;
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 🔥 gradient button */
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #020617;
+
+  transition: all .25s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(34,211,238,.3),
+    0 0 30px rgba(0,245,212,.2);
+}
+
+.btn:active {
+  transform: scale(.97);
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+/* ================== BACK BUTTON ================== */
+.btn-back {
+  width: 100%;
+  padding: 10px;
+
+  border-radius: 12px;
+  border: 1px solid var(--border);
+
+  background: transparent;
+  color: var(--muted);
+
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+
+  box-shadow: 0 0 10px rgba(34,211,238,.2);
+}
+
+/* ================== SPINNER ================== */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255,255,255,.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+/* ================== ALERT ================== */
+.result-banner {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+
+  border-radius: 12px;
+  font-size: .9rem;
+
+  animation: pop .3s ease;
+}
+
+.status-success {
+  background: rgba(34,197,94,.1);
+  color: var(--success);
+  border: 1px solid rgba(34,197,94,.3);
+}
+
+.status-error {
+  background: rgba(244,63,94,.1);
+  color: var(--error);
+  border: 1px solid rgba(244,63,94,.3);
+}
+
+.status-warning {
+  background: rgba(250,204,21,.1);
+  color: var(--warn);
+  border: 1px solid rgba(250,204,21,.3);
+}
+
+/* ================== FOOTER ================== */
+.footer {
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* ================== ANIMATIONS ================== */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
