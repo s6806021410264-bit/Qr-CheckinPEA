@@ -20,35 +20,35 @@ import {
 const KPI_CONFIG = [
   {
     icon: '👥',
-    label: 'Today Check-ins',
+    label: 'ลงชื่อวันนี้',
     getValue: (checkins) => checkins.length,
     color: '#3b82f6',
-    sub: () => (<><span style={{ color: '#22c55e' }}>↑</span> Live updating</>),
+    sub: () => (<><span style={{ color: '#22c55e' }}>↑</span> อัปเดตสด</>),
     bar: 'linear-gradient(90deg,#3b82f6,#8b5cf6)',
   },
   {
     icon: '⚡',
-    label: 'Not Checked-in',
+    label: 'ยังไม่ลงชื่อ',
     getValue: (checkins, usersOnly, checkedSet) =>
       Math.max(usersOnly.length - checkedSet.size, 0),
     color: '#f59e0b',
-    sub: () => (<><span style={{ color: '#f59e0b' }}>●</span> Pending check-in</>),
+    sub: () => (<><span style={{ color: '#f59e0b' }}>●</span> รอลงชื่อ</>),
     bar: 'linear-gradient(90deg,#f59e0b,#ef4444)',
   },
   {
     icon: '📅',
-    label: 'This Week',
+    label: 'สัปดาห์นี้',
     getValue: (checkins, _, __, weeklyTotal) => weeklyTotal,
-    sub: () => '7-day total',
+    sub: () => 'รวม 7 วัน',
     bar: 'linear-gradient(90deg,#f59e0b,#ef4444)',
   },
   {
     icon: '🟢',
-    label: 'System Status',
-    getValue: () => 'Operational',
+    label: 'สถานะระบบ',
+    getValue: () => 'ปกติ',
     color: '#22c55e',
     valStyle: { fontSize: 20, paddingTop: 4 },
-    sub: () => 'All services up',
+    sub: () => 'ระบบพร้อมใช้งาน',
     bar: 'linear-gradient(90deg,#22c55e,#84cc16)',
   },
 ]
@@ -117,8 +117,8 @@ export default function DashboardPage() {
   return (
     <>
       <div className="adm-page-header">
-        <h1>Dashboard</h1>
-        <p>Welcome back. Here's what's happening today.</p>
+        <h1>ภาพรวม</h1>
+        <p>สรุปสถานะการลงชื่อเข้าร่วมประจำวัน</p>
       </div>
 
       {loading ? (
@@ -145,8 +145,8 @@ export default function DashboardPage() {
         <div className="adm-card">
           <div className="adm-card-header">
             <div>
-              <div className="adm-card-title">Check-in Trend</div>
-              <div className="adm-card-sub">Last 12 hours</div>
+              <div className="adm-card-title">แนวโน้มการลงชื่อ</div>
+              <div className="adm-card-sub">12 ชั่วโมงล่าสุด</div>
             </div>
           </div>
           <div className="adm-card-body">
@@ -157,8 +157,8 @@ export default function DashboardPage() {
         <div className="adm-card">
           <div className="adm-card-header">
             <div>
-              <div className="adm-card-title">Daily Activity</div>
-              <div className="adm-card-sub">This week</div>
+              <div className="adm-card-title">กิจกรรมรายวัน</div>
+              <div className="adm-card-sub">สัปดาห์นี้</div>
             </div>
           </div>
           <div className="adm-card-body">
@@ -191,8 +191,8 @@ export default function DashboardPage() {
       <div className="adm-card">
         <div className="adm-card-header">
           <div>
-            <div className="adm-card-title">Recent Check-ins</div>
-            <div className="adm-card-sub">Today's activity</div>
+            <div className="adm-card-title">รายการลงชื่อล่าสุด</div>
+            <div className="adm-card-sub">กิจกรรมวันนี้</div>
           </div>
           <LiveIndicator />
         </div>
@@ -200,11 +200,11 @@ export default function DashboardPage() {
           {loading ? (
             <div style={{ padding: 20 }}><SkeletonTable rows={4} /></div>
           ) : checkins.length === 0 ? (
-            <EmptyState icon="📋" message="No check-ins yet today" />
+            <EmptyState icon="📋" message="วันนี้ยังไม่มีผู้ลงชื่อ" />
           ) : (
             <table className="adm-table">
               <thead>
-                <tr><th>#</th><th>Name</th><th>Code</th><th>Time</th></tr>
+                <tr><th>#</th><th>ชื่อ</th><th>รหัส</th><th>เวลา</th></tr>
               </thead>
               <tbody>
                 {checkins.slice(0, 5).map((item, i) => (

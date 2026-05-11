@@ -3,13 +3,13 @@ import PageShell from '../components/PageShell'
 import StatusBanner from '../components/StatusBanner'
 import { registerWalkInUser } from '../lib/registerService'
 import { performCheckIn } from '../lib/checkinService'
-import { FALLBACK_POSITION_OPTIONS, getPositionOptions } from '../lib/positions'
+import { getPositionOptions } from '../lib/positions'
 
 export default function RegisterForm({ onSuccess, onBack, theme, onToggleTheme }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [position, setPosition] = useState('')
-  const [positionOptions, setPositionOptions] = useState(FALLBACK_POSITION_OPTIONS)
+  const [positionOptions, setPositionOptions] = useState([])
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
 
@@ -85,7 +85,7 @@ export default function RegisterForm({ onSuccess, onBack, theme, onToggleTheme }
     >
       <main className="card">
         <p className="card-hint">
-          กรอกข้อมูลให้ครบ ระบบจะออกรหัส new-001, new-002 ตามลำดับ และ check-in ให้อัตโนมัติ
+          กรอกข้อมูลให้ครบ ระบบจะออกรหัส new-xxx และ check-in ให้อัตโนมัติ
         </p>
 
         <form onSubmit={handleSubmit} className="form">

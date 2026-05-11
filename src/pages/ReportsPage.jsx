@@ -9,8 +9,8 @@ const PER_PAGE = 10
 function getUserType(code = '') {
   const normalized = code.toLowerCase()
   if (normalized.startsWith('new-')) return 'New'
-  if (normalized.startsWith('emp')) return 'Staff'
-  return 'Other'
+  if (normalized.startsWith('emp')) return 'พนักงาน'
+  return 'อื่น ๆ'
 }
 
 function csvCell(value) {
@@ -19,7 +19,7 @@ function csvCell(value) {
 }
 
 function exportCSV(checkins, label) {
-  const rows = [['#', 'Name', 'Code', 'Type', 'Position', 'Date', 'Time']]
+  const rows = [['#', 'ชื่อ', 'รหัส', 'ประเภท', 'ตำแหน่ง', 'วันที่', 'เวลา']]
   checkins.forEach((item, i) => {
     rows.push([
       i + 1,
@@ -98,41 +98,41 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
   const monthLabel = dayjs(`${selectedYear}-${selectedMonth}-01`).format('MMMM YYYY')
   const years = Array.from({ length: 3 }, (_, i) => now.year() - i)
   const months = [
-    { v: 1, l: 'January' }, { v: 2, l: 'February' }, { v: 3, l: 'March' },
-    { v: 4, l: 'April' }, { v: 5, l: 'May' }, { v: 6, l: 'June' },
-    { v: 7, l: 'July' }, { v: 8, l: 'August' }, { v: 9, l: 'September' },
-    { v: 10, l: 'October' }, { v: 11, l: 'November' }, { v: 12, l: 'December' },
+    { v: 1, l: 'มกราคม' }, { v: 2, l: 'กุมภาพันธ์' }, { v: 3, l: 'มีนาคม' },
+    { v: 4, l: 'เมษายน' }, { v: 5, l: 'พฤษภาคม' }, { v: 6, l: 'มิถุนายน' },
+    { v: 7, l: 'กรกฎาคม' }, { v: 8, l: 'สิงหาคม' }, { v: 9, l: 'กันยายน' },
+    { v: 10, l: 'ตุลาคม' }, { v: 11, l: 'พฤศจิกายน' }, { v: 12, l: 'ธันวาคม' },
   ]
 
   return (
     <>
       <div className="adm-page-header">
-        <h1>Reports</h1>
-        <p>Summary statistics and exports</p>
+        <h1>รายงาน</h1>
+        <p>สรุปสถิติและส่งออกข้อมูล</p>
       </div>
 
       {/* ── TODAY SUMMARY ── */}
       <div className="adm-card" style={{ marginBottom: 24 }}>
         <div className="adm-card-header">
-          <div className="adm-card-title">Today's Summary</div>
+          <div className="adm-card-title">สรุปวันนี้</div>
           <button className="adm-export-btn" onClick={() => exportCSV(checkins, dayjs().format('YYYY-MM-DD'))}>
-            ⬇ Export CSV
+            ⬇ ส่งออก CSV
           </button>
         </div>
         <div className="adm-stat-row">
-          <span className="adm-stat-label">Total Check-ins</span>
+          <span className="adm-stat-label">ลงชื่อทั้งหมด</span>
           <span className="adm-stat-val">{checkins.length}</span>
         </div>
         <div className="adm-stat-row">
-          <span className="adm-stat-label">Peak Hour</span>
+          <span className="adm-stat-label">ช่วงเวลาสูงสุด</span>
           <span className="adm-stat-val">{checkins.length > 0 ? `${peakHour}:00` : '—'}</span>
         </div>
         <div className="adm-stat-row">
-          <span className="adm-stat-label">New Users</span>
+          <span className="adm-stat-label">ผู้ใช้ใหม่</span>
           <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.toLowerCase().startsWith('new-')).length}</span>
         </div>
         <div className="adm-stat-row">
-          <span className="adm-stat-label">Staff Users</span>
+          <span className="adm-stat-label">พนักงาน</span>
           <span className="adm-stat-val">{checkins.filter(c => c.users?.code?.toLowerCase().startsWith('emp')).length}</span>
         </div>
       </div>
@@ -141,8 +141,8 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
       <div className="adm-card">
         <div className="adm-card-header">
           <div>
-            <div className="adm-card-title">Monthly Report</div>
-            <div className="adm-card-sub">{monthLabel} — {monthlyData.length} check-ins</div>
+            <div className="adm-card-title">รายงานรายเดือน</div>
+            <div className="adm-card-sub">{monthLabel} — {monthlyData.length} รายการ</div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <select className="adm-select" value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
@@ -152,7 +152,7 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
               {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
             <button className="adm-export-btn" onClick={() => exportCSV(monthlyData, `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`)}>
-              ⬇ Export CSV
+              ⬇ ส่งออก CSV
             </button>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
         {/* Bar chart รายวัน */}
         <div className="adm-card-body">
           {loadingMonth ? (
-            <div style={{ textAlign: 'center', padding: 24, color: 'var(--muted)', fontSize: 13 }}>Loading…</div>
+            <div style={{ textAlign: 'center', padding: 24, color: 'var(--muted)', fontSize: 13 }}>กำลังโหลด...</div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <div className="adm-bars" style={{ height: 120, minWidth: daysInMonth * 28, gap: 3 }}>
@@ -193,7 +193,7 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
         {/* ── SESSION BY DAY ── */}
         {!loadingMonth && (
           monthlyData.length === 0 ? (
-            <EmptyState icon="📊" message={`No check-ins in ${monthLabel}`} />
+            <EmptyState icon="📊" message={`ไม่พบรายการลงชื่อใน ${monthLabel}`} />
           ) : (
             <div style={{ padding: '0 0 8px' }}>
               {sortedDays.map(day => {
@@ -239,10 +239,10 @@ export default function ReportsPage({ checkins, weeklyCheckins = [] }) {
                           <thead>
                             <tr>
                               <th>#</th>
-                              <th>Name</th>
-                              <th>Code</th>
-                              <th>Position</th>
-                              <th>Time</th>
+                              <th>ชื่อ</th>
+                              <th>รหัส</th>
+                              <th>ตำแหน่ง</th>
+                              <th>เวลา</th>
                             </tr>
                           </thead>
                           <tbody>

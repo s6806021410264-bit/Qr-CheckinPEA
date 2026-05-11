@@ -65,8 +65,8 @@ export default function CheckinsPage({ checkins, loading }) {
   return (
     <>
       <div className="adm-page-header">
-        <h1>Check-ins</h1>
-        <p>Real-time attendance log</p>
+        <h1>รายการลงชื่อ</h1>
+        <p>บันทึกการเข้าร่วมแบบอัปเดตสด</p>
       </div>
 
       <div className="adm-filter-bar">
@@ -77,11 +77,11 @@ export default function CheckinsPage({ checkins, loading }) {
           onChange={e => setFilterDate(e.target.value)}
         />
         {filterDate && (
-          <button className="adm-btn btn-ghost" onClick={() => setFilterDate('')}>Clear</button>
+          <button className="adm-btn btn-ghost" onClick={() => setFilterDate('')}>ล้างตัวกรอง</button>
         )}
         {!showingHistory && (
           <div style={{ marginLeft: 'auto' }}>
-            <LiveIndicator label="Realtime" />
+            <LiveIndicator label="อัปเดตสด" />
           </div>
         )}
       </div>
@@ -97,10 +97,10 @@ export default function CheckinsPage({ checkins, loading }) {
           {tableLoading
             ? <div style={{ padding: 20 }}><SkeletonTable /></div>
             : rows.length === 0
-              ? <EmptyState icon="🔍" message="No check-ins found" />
+              ? <EmptyState icon="🔍" message="ไม่พบรายการลงชื่อ" />
               : (
                 <table className="adm-table">
-                  <thead><tr><th>#</th><th>Name</th><th>Code</th><th>Date</th><th>Time</th></tr></thead>
+                  <thead><tr><th>#</th><th>ชื่อ</th><th>รหัส</th><th>วันที่</th><th>เวลา</th></tr></thead>
                   <tbody>
                     {rows.map((item, i) => (
                       <tr key={item.id} className={!showingHistory && newIds.has(item.id) ? 'new-row' : ''}>

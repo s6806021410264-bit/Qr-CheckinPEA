@@ -43,10 +43,10 @@ export default function EventsPage({ toast }) {
               try {
                      if (modal === 'add') {
                             await createEvent(form)
-                            toast('Event added', 'success')
+                            toast('เพิ่มกิจกรรมแล้ว', 'success')
                      } else if (modal?.edit) {
                             await updateEvent(modal.edit.id, form)
-                            toast('Event updated', 'success')
+                            toast('บันทึกกิจกรรมแล้ว', 'success')
                      }
                      setModal(null)
                      await loadEvents()
@@ -58,7 +58,7 @@ export default function EventsPage({ toast }) {
        async function handleDelete() {
               try {
                      await deleteEvent(modal.del.id)
-                     toast('Event deleted', 'success')
+                     toast('ลบกิจกรรมแล้ว', 'success')
                      setModal(null)
                      await loadEvents()
               } catch (err) {
@@ -79,20 +79,20 @@ export default function EventsPage({ toast }) {
        return (
               <>
                      <div className="adm-page-header">
-                            <h1>Events</h1>
-                            <p>Manage registration events</p>
+                            <h1>กิจกรรม</h1>
+                            <p>จัดการวันที่และรายละเอียดกิจกรรม</p>
                      </div>
 
                      <div className="adm-filter-bar">
                             <input
                                    className="adm-input"
-                                   placeholder="🔍 Search name or date…"
+                                   placeholder="ค้นหาชื่อกิจกรรมหรือวันที่"
                                    style={{ flex: 1, maxWidth: 280 }}
                                    value={search}
                                    onChange={e => { setSearch(e.target.value); setPage(1) }}
                             />
                             <button className="adm-btn btn-primary" style={{ marginLeft: 'auto' }} onClick={openAdd}>
-                                   + Add Event
+                                   + เพิ่มกิจกรรม
                             </button>
                      </div>
 
@@ -101,16 +101,16 @@ export default function EventsPage({ toast }) {
                                    {loading
                                           ? <div style={{ padding: 20 }}><SkeletonTable /></div>
                                           : paged.length === 0
-                                                 ? <EmptyState icon="📅" message="No events found" />
+                                                 ? <EmptyState icon="📅" message="ไม่พบกิจกรรม" />
                                                  : (
                                                         <table className="adm-table">
                                                                <thead>
                                                                       <tr>
                                                                              <th>#</th>
-                                                                             <th>Name</th>
-                                                                             <th>Date</th>
-                                                                             <th>Description</th>
-                                                                             <th>Actions</th>
+                                                                             <th>ชื่อกิจกรรม</th>
+                                                                             <th>วันที่</th>
+                                                                             <th>รายละเอียด</th>
+                                                                             <th>จัดการ</th>
                                                                       </tr>
                                                                </thead>
                                                                <tbody>
@@ -133,14 +133,14 @@ export default function EventsPage({ toast }) {
                                                                                                          style={{ padding: '5px 10px', fontSize: 12 }}
                                                                                                          onClick={() => openEdit(ev)}
                                                                                                   >
-                                                                                                         Edit
+                                                                                                         แก้ไข
                                                                                                   </button>
                                                                                                   <button
                                                                                                          className="adm-btn btn-danger"
                                                                                                          style={{ padding: '5px 10px', fontSize: 12 }}
                                                                                                          onClick={() => setModal({ del: ev })}
                                                                                                   >
-                                                                                                         Del
+                                                                                                         ลบ
                                                                                                   </button>
                                                                                            </div>
                                                                                     </td>
@@ -158,10 +158,10 @@ export default function EventsPage({ toast }) {
                      {(modal === 'add' || modal?.edit) && (
                             <div className="adm-overlay" onClick={e => e.target === e.currentTarget && setModal(null)}>
                                    <div className="adm-modal">
-                                          <h3>{modal === 'add' ? 'Add New Event' : 'Edit Event'}</h3>
+                                          <h3>{modal === 'add' ? 'เพิ่มกิจกรรมใหม่' : 'แก้ไขกิจกรรม'}</h3>
 
                                           <div className="adm-form-group">
-                                                 <label>Event Name</label>
+                                                 <label>ชื่อกิจกรรม</label>
                                                  <input
                                                         className="adm-input"
                                                         style={{ width: '100%' }}
@@ -172,7 +172,7 @@ export default function EventsPage({ toast }) {
                                           </div>
 
                                           <div className="adm-form-group">
-                                                 <label>Date</label>
+                                                 <label>วันที่</label>
                                                  <input
                                                         className="adm-input"
                                                         style={{ width: '100%' }}
@@ -183,7 +183,7 @@ export default function EventsPage({ toast }) {
                                           </div>
 
                                           <div className="adm-form-group">
-                                                 <label>Description (optional)</label>
+                                                 <label>รายละเอียด (ไม่บังคับ)</label>
                                                  <input
                                                         className="adm-input"
                                                         style={{ width: '100%' }}
@@ -194,9 +194,9 @@ export default function EventsPage({ toast }) {
                                           </div>
 
                                           <div className="adm-modal-actions">
-                                                 <button className="adm-btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
+                                                 <button className="adm-btn btn-ghost" onClick={() => setModal(null)}>ยกเลิก</button>
                                                  <button className="adm-btn btn-primary" onClick={handleSave}>
-                                                        {modal === 'add' ? 'Add Event' : 'Save Changes'}
+                                                        {modal === 'add' ? 'เพิ่มกิจกรรม' : 'บันทึก'}
                                                  </button>
                                           </div>
                                    </div>
@@ -207,14 +207,14 @@ export default function EventsPage({ toast }) {
                      {modal?.del && (
                             <div className="adm-overlay" onClick={e => e.target === e.currentTarget && setModal(null)}>
                                    <div className="adm-modal">
-                                          <h3>Delete Event</h3>
+                                          <h3>ลบกิจกรรม</h3>
                                           <p style={{ color: 'var(--muted2)', marginBottom: 20 }}>
-                                                 Remove <strong style={{ color: 'var(--text)' }}>{modal.del.name}</strong> (
-                                                 {dayjs(modal.del.date).format('DD MMM YYYY')})? This cannot be undone.
+                                                 ต้องการลบ <strong style={{ color: 'var(--text)' }}>{modal.del.name}</strong> (
+                                                 {dayjs(modal.del.date).format('DD MMM YYYY')}) ใช่ไหม?
                                           </p>
                                           <div className="adm-modal-actions">
-                                                 <button className="adm-btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
-                                                 <button className="adm-btn btn-danger" onClick={handleDelete}>Delete</button>
+                                                 <button className="adm-btn btn-ghost" onClick={() => setModal(null)}>ยกเลิก</button>
+                                                 <button className="adm-btn btn-danger" onClick={handleDelete}>ลบ</button>
                                           </div>
                                    </div>
                             </div>

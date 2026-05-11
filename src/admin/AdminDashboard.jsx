@@ -13,12 +13,12 @@ import { formatTime } from './utils/dateUtils'
 import './styles/adminDashboard.css'
 
 const NAV = [
-       { id: 'dashboard', icon: '◈', label: 'Dashboard' },
-       { id: 'checkins', icon: '✓', label: 'Check-ins' },
-       { id: 'users', icon: '👥', label: 'Users' },
-       { id: 'events', icon: '📅', label: 'Events' },
-       { id: 'reports', icon: '📊', label: 'Reports' },
-       { id: 'settings', icon: '⚙', label: 'Settings' },
+       { id: 'dashboard', icon: '◈', label: 'ภาพรวม' },
+       { id: 'checkins', icon: '✓', label: 'รายการลงชื่อ' },
+       { id: 'users', icon: '👥', label: 'ข้อมูลผู้ใช้' },
+       { id: 'events', icon: '📅', label: 'กิจกรรม' },
+       { id: 'reports', icon: '📊', label: 'รายงาน' },
+       { id: 'settings', icon: '⚙', label: 'ตั้งค่า' },
 ]
 
 function getAdminFromStorage() {
@@ -51,7 +51,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                      setCheckins(data)
                      setWeeklyCheckins(weekly)
               } catch (err) {
-                     toast('Failed to load check-ins', 'error')
+                     toast('โหลดรายการลงชื่อไม่สำเร็จ', 'error')
                      setCheckins([])
                      setWeeklyCheckins([])
               } finally {
@@ -70,7 +70,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                             () => {
                                    loadCheckins()
                                    setUnreadCount(n => n + 1)
-                                   toast('New check-in!', 'success')
+                                   toast('มีผู้ลงชื่อใหม่', 'success')
                             }
                      )
                      .subscribe()
@@ -133,13 +133,13 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                             <div className="adm-logo">
                                    <div className="adm-logo-icon">P</div>
                                    <div>
-                                          <div className="adm-logo-text">PEA Admin</div>
-                                          <div className="adm-logo-sub">Management System</div>
+                                          <div className="adm-logo-text">ผู้ดูแลระบบ PEA</div>
+                                          <div className="adm-logo-sub">ระบบจัดการการลงชื่อ</div>
                                    </div>
                             </div>
 
                             <nav className="adm-nav">
-                                   <div className="adm-nav-label">Menu</div>
+                                   <div className="adm-nav-label">เมนู</div>
                                    {NAV.map(item => (
                                           <button
                                                  key={item.id}
@@ -174,7 +174,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                                    <span className="adm-topbar-title">{pageTitle}</span>
 
                                    <div className="adm-topbar-right">
-                                          <button className="adm-icon-btn" title="Refresh" onClick={loadCheckins}>↻</button>
+                                          <button className="adm-icon-btn" title="รีเฟรช" onClick={loadCheckins}>↻</button>
                                           {onToggleTheme && (
                                                  <button
                                                         className="adm-icon-btn"
@@ -186,7 +186,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                                           )}
 
                                           <div ref={notifRef} style={{ position: 'relative' }}>
-                                                 <button className="adm-icon-btn" title="Notifications" onClick={handleNotifOpen}>
+                                                 <button className="adm-icon-btn" title="การแจ้งเตือน" onClick={handleNotifOpen}>
                                                         🔔
                                                         {unreadCount > 0 && (
                                                                <div style={{
@@ -217,14 +217,14 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                                                                       borderBottom: '1px solid var(--border)',
                                                                       display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                                                }}>
-                                                                      <span style={{ fontWeight: 600, fontSize: 14 }}>Recent Check-ins</span>
-                                                                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{checkins.length} today</span>
+                                                                      <span style={{ fontWeight: 600, fontSize: 14 }}>รายการลงชื่อล่าสุด</span>
+                                                                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{checkins.length} วันนี้</span>
                                                                </div>
 
                                                                <div style={{ maxHeight: 320, overflowY: 'auto' }}>
                                                                       {checkins.length === 0 ? (
                                                                              <div style={{ padding: 24, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-                                                                                    No check-ins yet today
+                                                                                    วันนี้ยังไม่มีผู้ลงชื่อ
                                                                              </div>
                                                                       ) : (
                                                                              checkins.slice(0, 8).map((item, i) => (
@@ -262,7 +262,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                                                                                     style={{ background: 'none', border: 'none', color: 'var(--accent2)', fontSize: 12, cursor: 'pointer' }}
                                                                                     onClick={() => { handleNavClick('checkins'); setNotifOpen(false) }}
                                                                              >
-                                                                                    View all {checkins.length} check-ins →
+                                                                                    ดูรายการทั้งหมด {checkins.length} รายการ →
                                                                              </button>
                                                                       </div>
                                                                )}
@@ -271,7 +271,7 @@ export default function AdminDashboard({ onLogout, theme, onToggleTheme }) {
                                           </div>
 
                                           <button className="adm-logout-btn" onClick={handleLogout}>
-                                                 ⏻ <span className="adm-logout-text">Logout</span>
+                                                 ⏻ <span className="adm-logout-text">ออกจากระบบ</span>
                                           </button>
                                    </div>
                             </div>

@@ -9,10 +9,10 @@ const APP_VERSION = '1.0.0'
 
 function StatusPill({ status }) {
   const config = {
-    ok: { text: 'OK', cls: 'badge-green' },
-    warn: { text: 'Check', cls: 'badge-amber' },
-    error: { text: 'Error', cls: 'badge-admin' },
-  }[status] || { text: 'Unknown', cls: 'badge-user' }
+    ok: { text: 'ปกติ', cls: 'badge-green' },
+    warn: { text: 'ตรวจสอบ', cls: 'badge-amber' },
+    error: { text: 'ผิดพลาด', cls: 'badge-admin' },
+  }[status] || { text: 'ไม่ทราบสถานะ', cls: 'badge-user' }
 
   return <span className={`adm-badge ${config.cls}`}>{config.text}</span>
 }
@@ -20,9 +20,9 @@ function StatusPill({ status }) {
 export default function SettingsPage({ toast }) {
   const [loading, setLoading] = useState(false)
   const [checks, setChecks] = useState([
-    { key: 'database', label: 'Database', desc: 'Supabase REST API', status: 'warn', value: 'Not checked' },
-    { key: 'event', label: 'Today Event', desc: 'Event configured for current Bangkok date', status: 'warn', value: 'Not checked' },
-    { key: 'realtime', label: 'Realtime', desc: 'Supabase realtime client available', status: 'ok', value: 'Client ready' },
+    { key: 'database', label: 'ฐานข้อมูล', desc: 'Supabase REST API', status: 'warn', value: 'ยังไม่ได้ตรวจสอบ' },
+    { key: 'event', label: 'กิจกรรมวันนี้', desc: 'กิจกรรมตามวันที่ประเทศไทย', status: 'warn', value: 'ยังไม่ได้ตรวจสอบ' },
+    { key: 'realtime', label: 'อัปเดตสด', desc: 'Supabase Realtime client', status: 'ok', value: 'พร้อมใช้งาน' },
   ])
 
   async function runChecks() {
@@ -38,15 +38,15 @@ export default function SettingsPage({ toast }) {
 
       nextChecks.push({
         key: 'database',
-        label: 'Database',
+        label: 'ฐานข้อมูล',
         desc: 'Supabase REST API',
         status: error ? 'error' : 'ok',
-        value: error ? error.message : 'Connected',
+        value: error ? error.message : 'เชื่อมต่อสำเร็จ',
       })
     } catch (err) {
       nextChecks.push({
         key: 'database',
-        label: 'Database',
+        label: 'ฐานข้อมูล',
         desc: 'Supabase REST API',
         status: 'error',
         value: err.message,
@@ -62,16 +62,16 @@ export default function SettingsPage({ toast }) {
 
       nextChecks.push({
         key: 'event',
-        label: 'Today Event',
-        desc: `Bangkok date ${today}`,
+        label: 'กิจกรรมวันนี้',
+        desc: `วันที่ประเทศไทย ${today}`,
         status: error ? 'error' : data ? 'ok' : 'warn',
-        value: error ? error.message : data ? data.name || data.date : 'No event today',
+        value: error ? error.message : data ? data.name || data.date : 'ยังไม่มีกิจกรรมวันนี้',
       })
     } catch (err) {
       nextChecks.push({
         key: 'event',
-        label: 'Today Event',
-        desc: `Bangkok date ${today}`,
+        label: 'กิจกรรมวันนี้',
+        desc: `วันที่ประเทศไทย ${today}`,
         status: 'error',
         value: err.message,
       })
@@ -79,15 +79,15 @@ export default function SettingsPage({ toast }) {
 
     nextChecks.push({
       key: 'realtime',
-      label: 'Realtime',
-      desc: 'Used by live check-ins and admin session presence',
+      label: 'อัปเดตสด',
+      desc: 'ใช้กับรายการลงชื่อสดและ session admin',
       status: supabase.channel ? 'ok' : 'error',
-      value: supabase.channel ? 'Client ready' : 'Unavailable',
+      value: supabase.channel ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน',
     })
 
     setChecks(nextChecks)
     setLoading(false)
-    toast?.('System checks refreshed', 'success')
+    toast?.('ตรวจสอบสถานะระบบแล้ว', 'success')
   }
 
   useEffect(() => {
@@ -97,19 +97,19 @@ export default function SettingsPage({ toast }) {
   return (
     <>
       <div className="adm-page-header">
-        <h1>Settings</h1>
-        <p>System status and application information</p>
+        <h1>ตั้งค่า</h1>
+        <p>สถานะระบบและข้อมูลแอปพลิเคชัน</p>
       </div>
 
       <div className="adm-grid2">
         <div className="adm-card">
           <div className="adm-card-header">
             <div>
-              <div className="adm-card-title">System Checks</div>
-              <div className="adm-card-sub">Live checks from the current configuration</div>
+              <div className="adm-card-title">ตรวจสอบระบบ</div>
+              <div className="adm-card-sub">ตรวจสอบจากการตั้งค่าปัจจุบัน</div>
             </div>
             <button className="adm-btn btn-ghost" onClick={runChecks} disabled={loading}>
-              {loading ? 'Checking...' : 'Refresh'}
+              {loading ? 'กำลังตรวจสอบ...' : 'รีเฟรช'}
             </button>
           </div>
           {checks.map(({ key, label, desc, status, value }) => (
@@ -125,21 +125,21 @@ export default function SettingsPage({ toast }) {
         </div>
 
         <div className="adm-card">
-          <div className="adm-card-header"><div className="adm-card-title">Application Info</div></div>
+          <div className="adm-card-header"><div className="adm-card-title">ข้อมูลแอปพลิเคชัน</div></div>
           <div className="adm-stat-row">
-            <span className="adm-stat-label">Version</span>
+            <span className="adm-stat-label">เวอร์ชัน</span>
             <span className="adm-stat-val">{APP_VERSION}</span>
           </div>
           <div className="adm-stat-row">
-            <span className="adm-stat-label">Environment</span>
-            <span className="adm-stat-val">Production</span>
+            <span className="adm-stat-label">สภาพแวดล้อม</span>
+            <span className="adm-stat-val">ใช้งานจริง</span>
           </div>
           <div className="adm-stat-row">
-            <span className="adm-stat-label">Timezone</span>
+            <span className="adm-stat-label">เขตเวลา</span>
             <span className="adm-stat-val">Asia/Bangkok</span>
           </div>
           <div className="adm-stat-row">
-            <span className="adm-stat-label">Registration Code</span>
+            <span className="adm-stat-label">รหัสสมัครใหม่</span>
             <span className="adm-stat-val">new-001+</span>
           </div>
         </div>
