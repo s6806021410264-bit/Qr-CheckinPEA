@@ -9,7 +9,7 @@ const PER_PAGE = 10
 function getUserType(code = '') {
   const normalized = code.toLowerCase()
   if (normalized.startsWith('new-')) return 'New'
-  if (normalized.startsWith('emp')) return 'พนักงาน'
+    if (/^\d+$/.test(normalized)) return 'พนักงาน'
   return 'อื่น ๆ'
 }
 
