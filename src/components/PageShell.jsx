@@ -21,9 +21,6 @@ export default function PageShell({ logo, title, subtitle, children, theme, onTo
         <p className="subtitle">{subtitle ?? todayStr}</p>
       </header>
       {children}
-      <footer className="footer">
-        <span>Powered by Supabase + React</span>
-      </footer>
     </div>
   )
 }
